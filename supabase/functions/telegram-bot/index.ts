@@ -63,7 +63,7 @@ serve(async (req) => {
       });
     }
 
-    // ---- Welcome prize ($10,000, 48h) admin tasks ----
+    // ---- Admin tasks ----
     const requireAdmin = async (tgId: number) => {
       const { data } = await supabase.rpc('is_telegram_admin', { _telegram_id: tgId });
       return data === true;
