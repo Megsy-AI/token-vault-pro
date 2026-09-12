@@ -13,7 +13,7 @@ import { payWithStars, starsForTon } from "@/lib/stars";
 import TelegramStar from "@/components/TelegramStar";
 import { useTonAddress, useTonConnectUI } from "@tonconnect/ui-react";
 import { PaymentError, sendTonPayment } from "@/lib/ton";
-import { purchaseServerForTelegram, verifyTonOnChain } from "@/lib/game-api";
+import { purchaseServerForTelegram, purchaseServerWithBalance, verifyTonOnChain } from "@/lib/game-api";
 import { usePaymentDiscount } from "@/hooks/use-payment-discount";
 import DiscountBanner from "@/components/DiscountBanner";
 import NftExplainer from "@/components/NftExplainer";
