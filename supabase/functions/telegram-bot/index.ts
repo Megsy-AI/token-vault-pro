@@ -945,66 +945,7 @@ async function sendApexStakingOffer(supabase: any, baseUrl: string) {
   return { ok: true, sent: true };
 }
 
-async function runPrizeBroadcast(supabase: any, baseUrl: string, limit: number) {
-  const { data: targets } = await supabase.rpc('next_prize_broadcast_targets', {
-    _limit: Math.min(limit, 2000),
-  });
-
-  const rows = targets ?? [];
-  let granted = 0;
-  let sent = 0;
-  let failed = 0;
-  const CHUNK = 25;
-
-  for (let i = 0; i < rows.length; i += CHUNK) {
-    const slice = rows.slice(i, i + CHUNK);
-    await Promise.all(
-      slice.map(async (p: any) => {
-        try {
-          const { data: res } = await supabase.rpc('grant_welcome_prize', {
-            _telegram_id: Number(p.telegram_id),
-          });
-          if (res?.granted) granted++;
-          const ok = await sendPrizeMessage(baseUrl, Number(p.telegram_id), p.first_name);
-          if (ok) sent++;
-          else failed++;
-          // Log every attempt so blocked chats are never retried forever.
-          await supabase.from('prize_broadcast_log').upsert(
-            { profile_id: p.id, sent_at: new Date().toISOString(), delivered: ok },
-            { onConflict: 'profile_id' },
-          );
-        } catch {
-          failed++;
-        }
-      }),
-    );
-    if (i + CHUNK < rows.length) await new Promise((r) => setTimeout(r, 1100));
-  }
-
-  return { ok: true, candidates: rows.length, granted, sent, failed };
-}
-
-// Opens a new broadcast round: re-grants the $10,000 prize to every player
-// (new, old and current) and clears the delivery log so the win message is
-// sent again to everyone by the per-minute worker. Throttled to 3.5 hours so a
-// stray call cannot spam users.
-async function startPrizeRound(supabase: any) {
-  const { data: last } = await supabase
-    .from('prize_broadcast_log')
-    .select('sent_at')
-    .order('sent_at', { ascending: false })
-    .limit(1)
-    .maybeSingle();
-
-  if (last?.sent_at && Date.now() - new Date(last.sent_at).getTime() < 3.5 * 60 * 60 * 1000) {
-    return { ok: true, skipped: 'throttled', last_run: last.sent_at };
-  }
-
-  const { data: grant } = await supabase.rpc('grant_prize_to_all');
-  await supabase.from('prize_broadcast_log').delete().gte('sent_at', '1970-01-01');
-
-  return { ok: true, round: 'started', granted: grant?.granted ?? 0 };
-}
+// The prize broadcast helpers were removed with the prize campaign.
 
 // ── Automated crash-game notifications ──────────────────────────────────────
 const CRASH_COOLDOWN_HOURS = 6;
