@@ -643,7 +643,7 @@ serve(async (req) => {
         }
 
         // Get welcome image from admin config (falls back to default Nova banner)
-        const DEFAULT_WELCOME_IMAGE = 'https://project--10a457f9-1071-441f-805e-a0a86ff9071a-dev.lovable.app/__l5e/assets-v1/9450cef6-cded-48d0-b9c7-169d6965a5b0/prize-10000-banner.jpg';
+        const DEFAULT_WELCOME_IMAGE = 'https://project--c73d4246-57f5-4613-a5ff-86a529d241dd.lovable.app/images/nova-icon.jpg';
         let welcomeImageUrl = DEFAULT_WELCOME_IMAGE;
         try {
           const { data: adminConfig } = await supabase
