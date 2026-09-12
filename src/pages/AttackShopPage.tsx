@@ -50,6 +50,39 @@ const AttackShopPage = () => {
     return items.reduce((min, p) => (p.price < min.price ? p : min), items[0]).key;
   }, [items]);
 
+  const handleBuyWithBalance = async (category: BattleCategory, packageKey: string) => {
+    const pkg = battlePackagesByCategory[category].find((item) => item.key === packageKey);
+    if (!pkg) return;
+    setBalanceBusy(pkg.key);
+    try {
+      const res = await purchaseBattleItemWithBalance({
+        telegramId: user.telegramUser.id,
+        category,
+        packageKey: pkg.key,
+        packageName: pkg.name,
+        quantity: pkg.quantity,
+        price: pkg.price,
+      });
+      if (!res?.success) {
+        toast({
+          title: res?.error === "insufficient_balance" ? "Not enough balance" : "Purchase failed",
+          description:
+            res?.error === "insufficient_balance"
+              ? `You need ${pkg.price} Gram in your balance.`
+              : "Please try again",
+          variant: "destructive",
+        });
+        return;
+      }
+      await refreshProfile();
+      toast({ title: "Purchase complete", description: `${pkg.name} added to your inventory` });
+    } catch {
+      toast({ title: "Purchase failed", description: "Please try again", variant: "destructive" });
+    } finally {
+      setBalanceBusy(null);
+    }
+  };
+
   const handleBuy = async (category: BattleCategory, packageKey: string) => {
     const pkg = battlePackagesByCategory[category].find((item) => item.key === packageKey);
     if (!pkg) return;
