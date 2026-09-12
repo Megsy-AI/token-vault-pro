@@ -201,7 +201,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
       };
 
       const dbReward = 0;
-      const dbRewardExpires = freshProfile?.reward_expires_at ?? (profile as any)?.reward_expires_at ?? null;
+      const dbRewardExpires = null;
 
 
       setUser((prev) => ({
