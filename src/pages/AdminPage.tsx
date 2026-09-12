@@ -23,7 +23,6 @@ const AdminPage = () => {
   const [newChar, setNewChar] = useState({ name: "", image_url: "monster-1", max_hp: 100 });
   const [newServer, setNewServer] = useState({ name: "", priceTon: 5, rarity: "common", miningBoost: 10, attackBoost: 10, tonMiningRate: 0.15, usdtMiningRate: 1.5 });
   const [broadcast, setBroadcast] = useState({ title: "", message: "" });
-  const [rewardLoading, setRewardLoading] = useState(false);
   const [welcomeImageUrl, setWelcomeImageUrl] = useState("");
 
   const telegramId = user.telegramUser.id;
@@ -112,29 +111,6 @@ const AdminPage = () => {
     await loadDashboard();
   };
 
-  const handleActivateReward = async () => {
-    if (rewardLoading) return;
-    setRewardLoading(true);
-    try {
-      const { data, error } = await (supabase as any).rpc("admin_activate_reward_for_telegram", {
-        _telegram_id: telegramId,
-        _reward_amount: 1500,
-      });
-
-      if (error) {
-        toast({ title: "Error", description: error.message, variant: "destructive" });
-        return;
-      }
-
-      toast({ title: "Reward Activated!", description: `$1,500 added to ${data?.updated || 'all'} users (48h timer started)` });
-      await loadDashboard();
-    } catch (e: any) {
-      toast({ title: "Error", description: e.message, variant: "destructive" });
-    } finally {
-      setRewardLoading(false);
-    }
-  };
-
   const handleSetWelcomeImage = async () => {
     if (!welcomeImageUrl.trim()) return;
     const { data, error } = await (supabase as any).rpc("admin_set_welcome_image_for_telegram", {
@@ -173,7 +149,7 @@ const AdminPage = () => {
 
       <Tabs defaultValue="users" className="w-full">
         <TabsList className="w-full bg-muted/50 rounded-2xl h-10 mb-4 grid grid-cols-8">
-          {["users", "tasks", "bosses", "servers", "notify", "txns", "reward", "bot"].map((tab) => (
+          {["users", "tasks", "bosses", "servers", "notify", "txns", "bot"].map((tab) => (
             <TabsTrigger key={tab} value={tab} className="rounded-xl font-display text-[7px] data-[state=active]:bg-primary data-[state=active]:text-primary-foreground capitalize">{tab}</TabsTrigger>
           ))}
         </TabsList>
@@ -324,45 +300,6 @@ const AdminPage = () => {
                 <p className="text-muted-foreground">{tx.status} · {new Date(tx.created_at).toLocaleDateString()}</p>
               </div>
             ))}
-          </div>
-        </TabsContent>
-
-        {/* Reward Activation Tab */}
-        <TabsContent value="reward">
-          <div className="glass rounded-2xl p-6 text-center space-y-4">
-            <div className="w-16 h-16 rounded-full bg-neon-green/20 flex items-center justify-center mx-auto">
-              <span className="text-3xl font-bold text-neon-green">$</span>
-            </div>
-            <div>
-              <h3 className="text-lg font-display font-bold text-foreground">$1,500 Reward System</h3>
-              <p className="text-xs text-muted-foreground mt-2">
-                Activate the $1,500 locked reward for all users. Expires after 48 hours automatically.
-              </p>
-            </div>
-            <div className="text-left glass rounded-xl p-3 space-y-2">
-              <p className="text-[11px] text-muted-foreground">
-                <span className="text-primary font-bold">Step 1:</span> Pay 2 Gram activation fee (fixed)
-              </p>
-              <p className="text-[11px] text-muted-foreground">
-                <span className="text-primary font-bold">Step 2:</span> Purchase a server (NFT)
-              </p>
-              <p className="text-[11px] text-muted-foreground">
-                <span className="text-primary font-bold">Step 3:</span> Kill a monster in battle
-              </p>
-              <p className="text-[11px] text-muted-foreground">
-                <span className="text-primary font-bold">Step 4:</span> Buy 50 attacks
-              </p>
-              <p className="text-[10px] text-destructive/70 mt-2 italic">
-                All conditions are hidden. Users discover them one by one. Auto-expires in 48h.
-              </p>
-            </div>
-            <Button 
-              onClick={handleActivateReward} 
-              disabled={rewardLoading}
-              className="w-full h-12 rounded-xl font-display text-sm glow-primary"
-            >
-              {rewardLoading ? "Activating..." : "Activate $1,500 for All Users"}
-            </Button>
           </div>
         </TabsContent>
 
