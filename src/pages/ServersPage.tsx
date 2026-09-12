@@ -13,7 +13,7 @@ import { payWithStars, starsForTon } from "@/lib/stars";
 import TelegramStar from "@/components/TelegramStar";
 import { useTonAddress, useTonConnectUI } from "@tonconnect/ui-react";
 import { PaymentError, sendTonPayment } from "@/lib/ton";
-import { purchaseServerForTelegram, verifyTonOnChain } from "@/lib/game-api";
+import { purchaseServerForTelegram, purchaseServerWithBalance, verifyTonOnChain } from "@/lib/game-api";
 import { usePaymentDiscount } from "@/hooks/use-payment-discount";
 import DiscountBanner from "@/components/DiscountBanner";
 import NftExplainer from "@/components/NftExplainer";
@@ -44,6 +44,7 @@ const ServersPage = () => {
   const [myNfts, setMyNfts] = useState<{ id: string; name: string; image_url: string }[]>([]);
   const [starBusy, setStarBusy] = useState<string | null>(null);
   const [tonBusy, setTonBusy] = useState<string | null>(null);
+  const [balanceBusy, setBalanceBusy] = useState<string | null>(null);
   const [tonConnectUI] = useTonConnectUI();
   const walletAddress = useTonAddress();
   const nftArt = useNftArt();
@@ -100,6 +101,30 @@ const ServersPage = () => {
       });
     } finally {
       setStarBusy(null);
+    }
+  };
+
+  const handleBuyWithBalance = async (server: Server) => {
+    setBalanceBusy(server.id);
+    try {
+      const res = await purchaseServerWithBalance(user.telegramUser.id, server.id);
+      if (!res?.success) {
+        toast({
+          title: res?.error === "insufficient_balance" ? "Not enough balance" : "Purchase failed",
+          description:
+            res?.error === "insufficient_balance"
+              ? `You need ${Number(server.price_ton)} Gram in your balance.`
+              : "Please try again",
+          variant: "destructive",
+        });
+        return;
+      }
+      await Promise.all([refreshProfile(), loadServers(), loadMyNfts()]);
+      toast({ title: "Purchase complete", description: `${server.name} added to your account` });
+    } catch {
+      toast({ title: "Purchase failed", description: "Please try again", variant: "destructive" });
+    } finally {
+      setBalanceBusy(null);
     }
   };
 

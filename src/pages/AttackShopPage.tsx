@@ -5,7 +5,7 @@ import { useTonAddress, useTonConnectUI } from "@tonconnect/ui-react";
 import { useToast } from "@/hooks/use-toast";
 import { useApp } from "@/context/AppContext";
 import { battlePackagesByCategory, battleCategoryOrder, battleCategoryLabels, type BattleCategory } from "@/lib/battle-store";
-import { purchaseBattleItemForTelegram, verifyTonOnChain } from "@/lib/game-api";
+import { purchaseBattleItemForTelegram, purchaseBattleItemWithBalance, verifyTonOnChain } from "@/lib/game-api";
 import { Sword, Zap, Shield, Flame, Package, ShieldCheck, Sparkles, TrendingUp } from "lucide-react";
 
 import { PaymentError, sendTonPayment } from "@/lib/ton";
@@ -42,6 +42,7 @@ const AttackShopPage = () => {
   const [tonConnectUI] = useTonConnectUI();
   const walletAddress = useTonAddress();
   const [verifying, setVerifying] = useState<string | null>(null);
+  const [balanceBusy, setBalanceBusy] = useState<string | null>(null);
   const [activeCategory, setActiveCategory] = useState<BattleCategory>("attack");
   const { discount, priceFor, refresh: refreshDiscount, requestSmartOffer, thinking: offerThinking } = usePaymentDiscount();
 
@@ -49,6 +50,39 @@ const AttackShopPage = () => {
   const cheapestKey = useMemo(() => {
     return items.reduce((min, p) => (p.price < min.price ? p : min), items[0]).key;
   }, [items]);
+
+  const handleBuyWithBalance = async (category: BattleCategory, packageKey: string) => {
+    const pkg = battlePackagesByCategory[category].find((item) => item.key === packageKey);
+    if (!pkg) return;
+    setBalanceBusy(pkg.key);
+    try {
+      const res = await purchaseBattleItemWithBalance({
+        telegramId: user.telegramUser.id,
+        category,
+        packageKey: pkg.key,
+        packageName: pkg.name,
+        quantity: pkg.quantity,
+        price: pkg.price,
+      });
+      if (!res?.success) {
+        toast({
+          title: res?.error === "insufficient_balance" ? "Not enough balance" : "Purchase failed",
+          description:
+            res?.error === "insufficient_balance"
+              ? `You need ${pkg.price} Gram in your balance.`
+              : "Please try again",
+          variant: "destructive",
+        });
+        return;
+      }
+      await refreshProfile();
+      toast({ title: "Purchase complete", description: `${pkg.name} added to your inventory` });
+    } catch {
+      toast({ title: "Purchase failed", description: "Please try again", variant: "destructive" });
+    } finally {
+      setBalanceBusy(null);
+    }
+  };
 
   const handleBuy = async (category: BattleCategory, packageKey: string) => {
     const pkg = battlePackagesByCategory[category].find((item) => item.key === packageKey);
@@ -238,7 +272,21 @@ const AttackShopPage = () => {
                         </span>
                       )}
                     </Button>
-                  </div>
+                   </div>
+
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="mt-3 w-full rounded-xl font-display text-[11px] h-10"
+                      onClick={() => handleBuyWithBalance(activeCategory, pkg.key)}
+                      disabled={balanceBusy === pkg.key || user.tonBalance < pkg.price}
+                    >
+                      {balanceBusy === pkg.key
+                        ? "Processing..."
+                        : user.tonBalance < pkg.price
+                          ? `Balance too low (${pkg.price} Gram)`
+                          : `Pay ${pkg.price} Gram from balance`}
+                    </Button>
                 </div>
               </motion.div>
             );
