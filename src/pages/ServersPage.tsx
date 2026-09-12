@@ -104,6 +104,30 @@ const ServersPage = () => {
     }
   };
 
+  const handleBuyWithBalance = async (server: Server) => {
+    setBalanceBusy(server.id);
+    try {
+      const res = await purchaseServerWithBalance(user.telegramUser.id, server.id);
+      if (!res?.success) {
+        toast({
+          title: res?.error === "insufficient_balance" ? "Not enough balance" : "Purchase failed",
+          description:
+            res?.error === "insufficient_balance"
+              ? `You need ${Number(server.price_ton)} Gram in your balance.`
+              : "Please try again",
+          variant: "destructive",
+        });
+        return;
+      }
+      await Promise.all([refreshProfile(), loadServers(), loadMyNfts()]);
+      toast({ title: "Purchase complete", description: `${server.name} added to your account` });
+    } catch {
+      toast({ title: "Purchase failed", description: "Please try again", variant: "destructive" });
+    } finally {
+      setBalanceBusy(null);
+    }
+  };
+
   const handleBuyWithTon = async (server: Server) => {
     // The server recomputes the discount on the intent; send the base price.
     const price = Number(server.price_ton);
