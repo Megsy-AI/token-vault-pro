@@ -5,7 +5,7 @@ import { useTonAddress, useTonConnectUI } from "@tonconnect/ui-react";
 import { useToast } from "@/hooks/use-toast";
 import { useApp } from "@/context/AppContext";
 import { battlePackagesByCategory, battleCategoryOrder, battleCategoryLabels, type BattleCategory } from "@/lib/battle-store";
-import { purchaseBattleItemForTelegram, verifyTonOnChain } from "@/lib/game-api";
+import { purchaseBattleItemForTelegram, purchaseBattleItemWithBalance, verifyTonOnChain } from "@/lib/game-api";
 import { Sword, Zap, Shield, Flame, Package, ShieldCheck, Sparkles, TrendingUp } from "lucide-react";
 
 import { PaymentError, sendTonPayment } from "@/lib/ton";
@@ -42,6 +42,7 @@ const AttackShopPage = () => {
   const [tonConnectUI] = useTonConnectUI();
   const walletAddress = useTonAddress();
   const [verifying, setVerifying] = useState<string | null>(null);
+  const [balanceBusy, setBalanceBusy] = useState<string | null>(null);
   const [activeCategory, setActiveCategory] = useState<BattleCategory>("attack");
   const { discount, priceFor, refresh: refreshDiscount, requestSmartOffer, thinking: offerThinking } = usePaymentDiscount();
 
