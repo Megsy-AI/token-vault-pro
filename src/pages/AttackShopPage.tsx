@@ -238,7 +238,21 @@ const AttackShopPage = () => {
                         </span>
                       )}
                     </Button>
-                  </div>
+                   </div>
+
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="mt-3 w-full rounded-xl font-display text-[11px] h-10"
+                      onClick={() => handleBuyWithBalance(activeCategory, pkg.key)}
+                      disabled={balanceBusy === pkg.key || user.tonBalance < pkg.price}
+                    >
+                      {balanceBusy === pkg.key
+                        ? "Processing..."
+                        : user.tonBalance < pkg.price
+                          ? `Balance too low (${pkg.price} Gram)`
+                          : `Pay ${pkg.price} Gram from balance`}
+                    </Button>
                 </div>
               </motion.div>
             );
