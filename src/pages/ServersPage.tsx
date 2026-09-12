@@ -260,6 +260,21 @@ const ServersPage = () => {
                     )}
                   </button>
                 </div>
+
+                <div className="px-4 pb-4">
+                  <button
+                    type="button"
+                    className="btn-ink-soft h-11 w-full text-xs font-semibold"
+                    onClick={() => void handleBuyWithBalance(server)}
+                    disabled={balanceBusy === server.id || user.tonBalance < Number(server.price_ton)}
+                  >
+                    {balanceBusy === server.id
+                      ? "Processing…"
+                      : user.tonBalance < Number(server.price_ton)
+                        ? `Balance too low (${Number(server.price_ton)} Gram)`
+                        : `Pay ${Number(server.price_ton)} Gram from balance`}
+                  </button>
+                </div>
               </motion.div>
             ))}
           </div>
