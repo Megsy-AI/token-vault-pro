@@ -304,3 +304,28 @@ export const adminBroadcastNotification = (telegramId: number, title: string, me
   callRpc<{ success: boolean; queued: number }>("admin_broadcast_notification_for_telegram", {
     _telegram_id: telegramId, _title: title, _message: message,
   });
+
+// ── Balance purchases (paid from the in-app Gram balance, no wallet needed) ──
+export const purchaseServerWithBalance = async (telegramId: number, serverId: string) => {
+  return callRpc<{ success: boolean; error?: string; transactionId?: string; price?: number }>(
+    "purchase_server_with_balance",
+    { _telegram_id: telegramId, _server_id: serverId },
+  );
+};
+
+export const purchaseBattleItemWithBalance = async (args: {
+  telegramId: number; category: string; packageKey: string; packageName: string;
+  quantity: number; price: number;
+}) => {
+  return callRpc<{ success: boolean; error?: string; inventory?: BattleInventoryItem[] }>(
+    "purchase_battle_item_with_balance",
+    {
+      _telegram_id: args.telegramId,
+      _category: args.category,
+      _package_key: args.packageKey,
+      _package_name: args.packageName,
+      _quantity: args.quantity,
+      _price: args.price,
+    },
+  );
+};
