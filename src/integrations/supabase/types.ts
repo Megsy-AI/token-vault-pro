@@ -1785,7 +1785,7 @@ export type Database = {
         }
       }
       all_prize_broadcast_targets: {
-        Args: { _limit: number; _offset?: number }
+        Args: { _limit?: number; _offset?: number }
         Returns: {
           first_name: string
           id: string
