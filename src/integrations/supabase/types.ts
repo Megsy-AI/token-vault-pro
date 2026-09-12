@@ -1962,6 +1962,17 @@ export type Database = {
         }
         Returns: Json
       }
+      purchase_battle_item_with_balance: {
+        Args: {
+          _category: string
+          _package_key: string
+          _package_name: string
+          _price: number
+          _quantity: number
+          _telegram_id: number
+        }
+        Returns: Json
+      }
       purchase_battle_item_with_intent: {
         Args: {
           _category: string
@@ -1982,6 +1993,10 @@ export type Database = {
           _tx_hash?: string
           _wallet_address?: string
         }
+        Returns: Json
+      }
+      purchase_server_with_balance: {
+        Args: { _server_id: string; _telegram_id: number }
         Returns: Json
       }
       purchase_server_with_intent: {
