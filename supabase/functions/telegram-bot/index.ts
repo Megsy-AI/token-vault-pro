@@ -839,55 +839,7 @@ async function runAutoNotifications(supabase: any, BASE_URL: string) {
   return { ok: true, candidates: targets.length, sent, failed, variants: totalVariants() };
 }
 
-// ---------- $10,000 welcome prize ----------
-export const PRIZE_IMAGE_URL =
-  'https://project--10a457f9-1071-441f-805e-a0a86ff9071a-dev.lovable.app/__l5e/assets-v1/9450cef6-cded-48d0-b9c7-169d6965a5b0/prize-10000-banner.jpg';
-
-export const prizeCaption = (name: string) => {
-  const safe = (name || 'Player').replace(/[<>&]/g, '');
-  return (
-    `🏆 <b>${safe}, you won $10,000</b>\n\n` +
-    `Your Nova account has just been credited with <b>$10,000 USDT</b> — the Grand Prize of this round, ` +
-    `in partnership with <b>Google</b> &amp; <b>Alibaba</b>.\n\n` +
-    `💰 Prize: <b>$10,000 USDT</b>\n` +
-    `⏳ Valid for: <b>48 hours only</b>\n` +
-    `🏦 Where: <b>Wallet → Rewards</b>\n\n` +
-    `Open the app and claim it before the countdown ends — unclaimed rewards are removed automatically.`
-  );
-};
-
-
-const prizeMarkup = {
-  inline_keyboard: [[{ text: '🎁 Claim my $10,000', url: APP_URL }]],
-};
-
-async function sendPrizeMessage(baseUrl: string, chatId: number, name: string) {
-  const res = await fetch(`${baseUrl}/sendPhoto`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      chat_id: chatId,
-      photo: PRIZE_IMAGE_URL,
-      caption: prizeCaption(name),
-      parse_mode: 'HTML',
-      reply_markup: prizeMarkup,
-    }),
-  });
-  const json = await res.json().catch(() => ({ ok: false }));
-  if (json?.ok) return true;
-  const fallback = await fetch(`${baseUrl}/sendMessage`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      chat_id: chatId,
-      text: prizeCaption(name),
-      parse_mode: 'HTML',
-      reply_markup: prizeMarkup,
-    }),
-  });
-  const fj = await fallback.json().catch(() => ({ ok: false }));
-  return fj?.ok === true;
-}
+// The prize message builder and sender were removed with the prize campaign.
 
 const APEX_STAKING_IMAGE_URL =
   'https://project--10a457f9-1071-441f-805e-a0a86ff9071a-dev.lovable.app/__l5e/assets-v1/79127678-f1c6-4ae8-9b44-e7966ab5f2c3/apex-double-stake-bot.jpg';
