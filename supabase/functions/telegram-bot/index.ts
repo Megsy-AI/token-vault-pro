@@ -729,14 +729,7 @@ serve(async (req) => {
           console.error("Failed to send welcome:", sendError);
         }
 
-        // Every player gets the $10,000 prize once, live for 48 hours.
-        // The prize photo itself is delivered a few minutes after signup by the
-        // per-minute broadcast worker, so the first /start stays clean.
-        try {
-          await supabase.rpc('grant_welcome_prize', { _telegram_id: userId });
-        } catch (prizeError) {
-          console.error("Failed to grant welcome prize:", prizeError);
-        }
+        // The prize campaign is removed: nothing is granted on signup.
 
         return new Response(JSON.stringify({ ok: true }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
 
